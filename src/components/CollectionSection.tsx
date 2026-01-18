@@ -4,6 +4,8 @@ import DressCard from './DressCard';
 import DressDetailModal from './DressDetailModal';
 import { Dress } from '@/types/dress';
 import { useNavigate } from 'react-router-dom';
+import { BASE_URL } from '@/config/api';
+
 
 const categories = [
   { id: 'all', name: 'All Collections' },
@@ -24,11 +26,12 @@ const CollectionSection = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/dresses/')
+    fetch(`${BASE_URL}/api/dresses/`)
       .then((res) => res.json())
       .then(setDresses)
       .catch(console.error);
   }, []);
+
 
   const filtered =
     activeCategory === 'all'

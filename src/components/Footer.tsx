@@ -15,9 +15,9 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-6">
-              <img 
-                src={logo} 
-                alt="The Missing Fit" 
+              <img
+                src={logo}
+                alt="The Missing Fit"
                 className="h-16 w-16 rounded-full object-cover border-2 border-cream/30"
               />
             </div>
@@ -53,7 +53,9 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="/admin" className="text-cream/70 hover:text-cream transition-colors">
+                <a href={`${import.meta.env.VITE_API_URL}/admin`}
+                  target="_blank"
+                  rel="noopener noreferrer" className="text-cream/70 hover:text-cream transition-colors">
                   Admin Portal
                 </a>
               </li>
@@ -105,8 +107,8 @@ const Footer = () => {
                 <MessageCircle className="h-4 w-4" />
                 Chat on WhatsApp
               </Button>
-              <Button 
-                variant="goldOutline" 
+              <Button
+                variant="goldOutline"
                 className="w-full"
                 onClick={() => window.location.href = 'tel:+917225994009'}
               >
@@ -114,12 +116,12 @@ const Footer = () => {
                 Call Now
               </Button>
             </div>
-            
+
             {/* Social */}
             <div className="flex gap-3 mt-6">
-              <a 
-                href="https://instagram.com/themissingfit" 
-                target="_blank" 
+              <a
+                href="https://instagram.com/themissingfit"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="p-3 rounded-full bg-cream/10 hover:bg-cream/20 transition-colors"
               >

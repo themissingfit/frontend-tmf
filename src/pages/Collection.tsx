@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import DressCard from '@/components/DressCard';
 import DressDetailModal from '@/components/DressDetailModal';
 import { Dress } from '@/types/dress';
+import { BASE_URL } from '@/config/api';
 
 const categories = [
   { id: 'all', name: 'All Collections' },
@@ -23,11 +24,12 @@ const Collection = () => {
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_LOAD);
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/dresses/')
+    fetch(`${BASE_URL}/api/dresses/`)
       .then((res) => res.json())
       .then(setDresses)
       .catch(console.error);
   }, []);
+
 
   const filtered =
     activeCategory === 'all'

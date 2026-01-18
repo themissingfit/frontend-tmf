@@ -1,27 +1,20 @@
+export interface DressImage {
+  url: string;
+}
+
 export interface Dress {
-  id: string;
+  id: number;
   name: string;
-  category: 'lehenga' | 'saree' | 'indo-western' | 'anarkali' | 'gown' | 'sharara';
-  image: string;
-  priceWithoutJewelry: number;
-  priceWithJewelry: number;
-  securityDeposit: number;
-  sizes: string[];
   description: string;
-  isAvailable: boolean;
-  rentalPeriods?: RentalPeriod[];
-}
+  dress_type: string;
 
-export interface RentalPeriod {
-  id: string;
-  startDate: string;
-  endDate: string;
-  customerName?: string;
-}
+  price_without_jewelry: string;
+  price_with_jewelry: string;
+  security_deposit: string;
 
-export interface DamagePenalty {
-  type: string;
-  description: string;
-  minCharge: number;
-  maxCharge: number;
+  status: 'available' | 'rented' | 'maintenance';
+  available_after: string | null;
+
+  sizes: string;
+  images: DressImage[];
 }

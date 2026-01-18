@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import DressCard from './DressCard';
-import DressDetailModal from './DressDetailModal';
+import DressCard from '@/components/DressCard';
+import DressDetailModal from '@/components/DressDetailModal';
 import { Dress } from '@/types/dress';
-import { useNavigate } from 'react-router-dom';
 
 const categories = [
   { id: 'all', name: 'All Collections' },
@@ -15,13 +14,13 @@ const categories = [
   { id: 'sharara', name: 'Sharars' },
 ];
 
-const HOME_LIMIT = 8;
+const ITEMS_PER_LOAD = 9;
 
-const CollectionSection = () => {
+const Collection = () => {
   const [dresses, setDresses] = useState<Dress[]>([]);
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedDress, setSelectedDress] = useState<Dress | null>(null);
-  const navigate = useNavigate();
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_LOAD);
 
   useEffect(() => {
     fetch('http://127.0.0.1:8000/api/dresses/')
@@ -35,33 +34,41 @@ const CollectionSection = () => {
       ? dresses
       : dresses.filter((d) => d.dress_type === activeCategory);
 
-  const visibleDresses = filtered.slice(0, HOME_LIMIT);
+  const visibleDresses = filtered.slice(0, visibleCount);
+
+  const canLoadMore = visibleCount < filtered.length;
 
   return (
-    <section id="collection" className="py-20 bg-background">
+    <section className="py-20 bg-background min-h-screen">
       <div className="container mx-auto px-4">
         {/* Heading */}
         <div className="text-center mb-12">
-          <h2 className="font-display text-3xl md:text-4xl lg:text-5xl mb-4">
-            Our <span className="text-gradient-gold">Curated Collection</span>
-          </h2>
+          <h1 className="font-display text-3xl md:text-4xl lg:text-5xl mb-4">
+            Explore <span className="text-gradient-gold">Our Collection</span>
+          </h1>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Browse our complete range of outfits curated for every occasion.
+          </p>
         </div>
 
-        {/* Category Filters */}
+        {/* Category Filter */}
         <div className="flex flex-wrap justify-center gap-3 mb-12">
           {categories.map((c) => (
             <Button
               key={c.id}
               variant={activeCategory === c.id ? 'gold' : 'outline'}
               size="sm"
-              onClick={() => setActiveCategory(c.id)}
+              onClick={() => {
+                setActiveCategory(c.id);
+                setVisibleCount(ITEMS_PER_LOAD);
+              }}
             >
               {c.name}
             </Button>
           ))}
         </div>
 
-        {/* Cards Grid */}
+        {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {visibleDresses.map((dress) => (
             <DressCard
@@ -72,21 +79,20 @@ const CollectionSection = () => {
           ))}
         </div>
 
-        {/* View Full Collection */}
-        {dresses.length > HOME_LIMIT && (
-          <div className="text-center mt-14">
+        {/* Load More */}
+        {canLoadMore && (
+          <div className="flex justify-center mt-14">
             <Button
+              variant="gold"
               size="lg"
-              variant="outline"
-              className="px-10 py-6 text-base rounded-full border-accent text-accent hover:bg-accent hover:text-primary transition-all"
-              onClick={() => navigate('/collection')}
+              onClick={() => setVisibleCount((prev) => prev + ITEMS_PER_LOAD)}
             >
-              View Full Collection
+              Load More
             </Button>
           </div>
         )}
 
-        {/* Detail Modal */}
+        {/* Modal */}
         <DressDetailModal
           dress={selectedDress}
           isOpen={!!selectedDress}
@@ -97,4 +103,4 @@ const CollectionSection = () => {
   );
 };
 
-export default CollectionSection;
+export default Collection;

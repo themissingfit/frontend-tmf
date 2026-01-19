@@ -17,27 +17,18 @@ const DressCard = ({ dress, onViewDetails }: DressCardProps) => {
     );
   };
 
-  // ✅ Django backend image mapping
   const primaryImage = dress.images?.[0]?.url || '';
-
   const isAvailable = dress.status === 'available';
 
   return (
-    <div className="group card-elegant overflow-hidden">
-      {/* Image Container — EXACT OG SIZE */}
+    <div className="group card-elegant overflow-hidden flex flex-col h-full">
+      {/* Image Container */}
       <div className="relative aspect-[3/4] overflow-hidden">
         {primaryImage && (
           <img
             src={primaryImage}
             alt={dress.name}
-            className="
-              w-full
-              h-full
-              object-cover
-              transition-transform
-              duration-500
-              group-hover:scale-105
-            "
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         )}
 
@@ -64,7 +55,7 @@ const DressCard = ({ dress, onViewDetails }: DressCardProps) => {
           </Badge>
         </div>
 
-        {/* Quick Actions Overlay — OG */}
+        {/* Quick Actions Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-chocolate/90 via-chocolate/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
           <div className="w-full flex gap-2">
             <Button
@@ -86,8 +77,8 @@ const DressCard = ({ dress, onViewDetails }: DressCardProps) => {
         </div>
       </div>
 
-      {/* Content — untouched */}
-      <div className="p-5">
+      {/* Content */}
+      <div className="p-5 flex flex-col flex-grow">
         <h3 className="font-display text-lg text-foreground mb-2 line-clamp-1">
           {dress.name}
         </h3>
@@ -96,7 +87,30 @@ const DressCard = ({ dress, onViewDetails }: DressCardProps) => {
           {dress.description}
         </p>
 
-        <div className="space-y-2 mb-4">
+        {/* --- ADDED SECTION: SIZES & AVAILABILITY --- */}
+        <div className="flex flex-wrap gap-2 mb-4 mt-auto">
+          {/* Size Badge */}
+          <div className="inline-flex items-center px-2 py-1 rounded bg-secondary/50 border border-border text-xs font-medium text-muted-foreground">
+            Size: <span className="text-foreground ml-1">{dress.sizes}</span>
+          </div>
+
+          {/* Available After Date (Only shows if date exists) */}
+          {dress.available_after && (
+            <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-red-50 border border-red-100 text-xs font-medium text-red-800">
+              <Calendar className="h-3 w-3" />
+              <span>
+                Available after: {new Date(dress.available_after).toLocaleDateString('en-GB', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric'
+                })}
+              </span>
+            </div>
+          )}
+        </div>
+        {/* ------------------------------------------- */}
+
+        <div className="space-y-2 mb-1 pt-2 border-t border-border">
           <div className="flex justify-between items-center text-sm">
             <span className="text-muted-foreground">Without Jewelry</span>
             <span className="font-semibold text-foreground">
@@ -111,7 +125,7 @@ const DressCard = ({ dress, onViewDetails }: DressCardProps) => {
             </span>
           </div>
 
-          <div className="flex justify-between items-center text-sm pt-2 border-t border-border">
+          <div className="flex justify-between items-center text-sm pt-2 border-t border-dashed border-border">
             <span className="text-muted-foreground">Security Deposit</span>
             <span className="font-medium text-foreground">
               ₹{Number(dress.security_deposit).toLocaleString('en-IN')}

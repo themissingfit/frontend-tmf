@@ -37,191 +37,218 @@ const DressDetailModal = ({ dress, isOpen, onClose }: DressDetailModalProps) => 
     );
   };
 
-  // --- THE FIX STARTS HERE ---
-  // This helper handles both Arrays ["S", "L"] and Strings "S, L"
-  const getSizeList = (sizes: string | string[]): string[] => {
-    if (Array.isArray(sizes)) {
-      return sizes; // It's already an array, perfect!
-    }
-    if (typeof sizes === 'string') {
-      // If it looks like a JSON array string "['S', 'L']", clean it
-      if (sizes.trim().startsWith('[')) {
-        try {
-           // Try to parse it as real JSON
-           const parsed = JSON.parse(sizes.replace(/'/g, '"'));
-           if (Array.isArray(parsed)) return parsed;
-        } catch (e) {
-           // If parsing fails, just strip brackets and split
-           return sizes.replace(/[\[\]"']/g, '').split(',').map(s => s.trim());
-        }
-      }
-      // Standard comma separated string "S, M, L"
-      return sizes.split(',').map(s => s.trim());
-    }
-    return ['Free Size']; // Fallback
-  };
+  const sizeList = dress.sizes 
+    ? (Array.isArray(dress.sizes) ? dress.sizes : dress.sizes.split(',').map(s => s.trim()))
+    : ['Free Size'];
 
-  const sizeList = getSizeList(dress.sizes);
-  // --- THE FIX ENDS HERE ---
+  // Mobile buttons: Kept exactly as requested (h-11, text-sm)
+  const ActionButtons = () => (
+    <div className="flex gap-3 w-full">
+      <Button 
+        className="flex-1 bg-[#25D366] hover:bg-[#1ebc57] text-white shadow-md h-11 text-sm font-semibold rounded-lg" 
+        onClick={handleWhatsApp}
+      >
+        <MessageCircle className="h-4 w-4 mr-2" />
+        Book via WhatsApp
+      </Button>
+      <Button 
+        variant="outline" 
+        className="flex-1 border-gray-300 text-gray-700 h-11 text-sm font-medium rounded-lg hover:bg-gray-50 hover:text-black" 
+        onClick={() => window.location.href = 'tel:+917225994009'}
+      >
+        <Phone className="h-4 w-4 mr-2" />
+        Call Now
+      </Button>
+    </div>
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[900px] w-[95vw] max-h-[85vh] p-5 overflow-hidden flex flex-col bg-white rounded-xl shadow-2xl border-none gap-0">
+      {/* LAYOUT STRATEGY:
+         Mobile: Fixed height (max-h-[92vh]), Flex col, internal scroll.
+         Desktop: Auto height (fit content), Max width reduced for "Card" feel, No internal scroll bar.
+      */}
+      <DialogContent className="
+        w-[95vw] bg-white rounded-xl shadow-2xl border-none gap-0 outline-none p-0
+        max-h-[92vh] overflow-hidden flex flex-col
+        md:max-w-[900px] md:h-auto md:block md:overflow-visible
+      ">
         
-        <div className="grid md:grid-cols-2 gap-6 h-full overflow-hidden">
+        {/* DESKTOP TITLE: Sits at the very top, above columns. Hidden on mobile to preserve mobile flow. */}
+        <div className="hidden md:block p-6 pb-2">
+           <DialogTitle className="font-display text-3xl text-[#2D2D2D] tracking-tight">
+              {dress.name}
+           </DialogTitle>
+        </div>
+
+        {/* WRAPPER:
+           Mobile: Flex Col (Image -> Details).
+           Desktop: Flex Row (Image Left | Details Right).
+        */}
+        <div className="
+          flex-1 flex flex-col overflow-y-auto custom-scrollbar
+          md:flex-row md:p-6 md:pt-2 md:gap-8 md:overflow-visible md:h-auto
+        ">
           
-          {/* --- LEFT COLUMN: IMAGES --- */}
-          <div className="flex flex-col h-full max-h-[60vh] md:max-h-full">
-            <div className="relative flex-grow rounded-lg overflow-hidden bg-gray-50 aspect-[3/4] md:aspect-auto">
+          {/* ================= LEFT COLUMN (IMAGES) ================= */}
+          <div className="
+            w-full bg-gray-50 flex flex-col shrink-0 relative
+            md:w-[40%] md:bg-transparent md:block
+          ">
+            
+            {/* MAIN IMAGE */}
+            <div className="relative w-full aspect-[3/4] overflow-hidden bg-gray-100 group md:rounded-xl">
               {activeImage && (
                 <img
                   src={activeImage}
                   alt={dress.name}
-                  className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                  className="w-full h-full object-cover object-top"
                 />
               )}
-
-              <div className="absolute top-3 left-3 flex gap-2">
+              
+              <div className="absolute top-4 left-4 flex gap-2 z-10">
                 <Badge 
                   className={isAvailable 
-                    ? "bg-[#F59E0B] text-white border-none px-2.5 py-0.5 text-xs shadow-sm" 
-                    : "bg-burgundy text-cream border-none px-2.5 py-0.5 text-xs shadow-sm"
+                    ? "bg-[#F59E0B] text-white border-none shadow-sm px-3 py-1" 
+                    : "bg-burgundy text-cream border-none shadow-sm px-3 py-1"
                   }
                 >
-                  {isAvailable ? 'Available' : 'Rented'}
+                  {isAvailable ? 'Available Now' : 'Rented'}
                 </Badge>
                 {dress.dress_type && (
-                  <Badge variant="secondary" className="bg-white/90 backdrop-blur text-black text-xs capitalize shadow-sm">
-                    {dress.dress_type}
-                  </Badge>
+                   <Badge variant="secondary" className="bg-white/90 backdrop-blur text-black capitalize shadow-sm px-3 py-1">
+                      {dress.dress_type}
+                   </Badge>
                 )}
               </div>
             </div>
 
+            {/* THUMBNAILS - Desktop: Hidden or Small underneath? Kept basic to match "Blush Pink" card style */}
             {dress.images?.length > 1 && (
               <div 
-                className="flex gap-2 mt-3 overflow-x-auto pb-1"
+                className="flex p-4 bg-white border-t border-gray-100 gap-3 overflow-x-auto justify-start md:justify-center whitespace-nowrap shrink-0 z-10 md:border-none md:p-0 md:mt-3 md:justify-start"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
                 {dress.images.map((img, index) => (
                   <button
                     key={index}
                     onClick={() => setActiveImage(img.url)}
-                    className={`relative h-14 w-12 flex-shrink-0 rounded-md overflow-hidden border transition-all duration-200 ${
-                      activeImage === img.url
-                        ? 'border-gray-800 opacity-100 scale-105'
-                        : 'border-transparent opacity-50 hover:opacity-100 grayscale hover:grayscale-0'
+                    className={`relative h-16 w-14 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                      activeImage === img.url 
+                        ? 'border-gray-800 opacity-100 scale-105' 
+                        : 'border-transparent opacity-60 hover:opacity-100 grayscale hover:grayscale-0'
                     }`}
                   >
-                    <img src={img.url} alt="" className="w-full h-full object-cover" />
+                    <img 
+                      src={img.url} 
+                      alt={`View ${index + 1}`} 
+                      className="w-full h-full object-cover object-top" 
+                    />
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          {/* --- RIGHT COLUMN: DETAILS --- */}
-          <div className="flex flex-col h-full overflow-hidden">
+          {/* ================= RIGHT COLUMN (DETAILS) ================= */}
+          <div className="
+            flex-1 flex flex-col bg-white
+            md:w-[60%] md:block md:h-auto
+          ">
             
-            <div 
-              className="overflow-y-auto pr-2 flex-grow"
-              style={{ scrollbarWidth: 'thin', scrollbarColor: '#EBE9E4 transparent' }}
-            >
-              <DialogHeader className="mb-1 p-0 space-y-1 text-left">
-                <DialogTitle className="font-display text-2xl md:text-3xl text-[#2D2D2D] tracking-tight">
-                  {dress.name}
-                </DialogTitle>
-              </DialogHeader>
-
-              <div className="space-y-5 mt-2">
-                <p className="text-gray-500 leading-relaxed text-sm">
-                  {dress.description}
-                </p>
-
-                <div className="bg-[#F9F8F6] rounded-lg p-4 border border-[#EBE9E4] space-y-3">
-                  <h4 className="font-display text-base text-[#4A4A4A]">Rental Pricing</h4>
-                  
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between items-center border-b border-[#EBE9E4] pb-2">
-                      <span className="text-gray-500 font-medium">Outfit Only</span>
-                      <span className="text-lg font-bold text-gray-900">
-                        ₹{Number(dress.price_without_jewelry).toLocaleString('en-IN')}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between items-center border-b border-[#EBE9E4] pb-2">
-                      <span className="text-gray-500 font-medium">With Matching Jewelry</span>
-                      <span className="text-lg font-bold text-[#D4AF37]">
-                        ₹{Number(dress.price_with_jewelry).toLocaleString('en-IN')}
-                      </span>
-                    </div>
-
-                    <div className="pt-1 flex justify-between items-center">
-                      <div className="flex items-center gap-1.5">
-                        <Shield className="h-3.5 w-3.5 text-gray-400" />
-                        <span className="text-[11px] text-gray-500 uppercase tracking-wide">Security Deposit</span>
-                      </div>
-                      <span className="font-medium text-gray-700">
-                        ₹{Number(dress.security_deposit).toLocaleString('en-IN')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* SIZES SECTION */}
-                <div>
-                  <h4 className="font-display text-sm text-[#4A4A4A] mb-2">Available Sizes</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {sizeList.map((size) => (
-                      <span
-                        key={size}
-                        className="min-w-[3rem] h-9 flex items-center justify-center border border-gray-200 rounded text-xs font-medium text-gray-700 bg-white shadow-sm cursor-default"
-                      >
-                        {size}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {!isAvailable && dress.available_after && (
-                   <div className="bg-red-50 rounded-lg p-3 flex items-center gap-3 border border-red-100">
-                     <div className="bg-white p-1.5 rounded-full shadow-sm">
-                       <Calendar className="h-4 w-4 text-red-600" />
-                     </div>
-                     <div>
-                       <p className="text-[10px] font-bold text-red-800 uppercase tracking-wide">Currently Rented</p>
-                       <p className="text-xs text-red-600 mt-0.5">
-                         Available from <span className="font-semibold">{new Date(dress.available_after).toLocaleDateString('en-IN', {
-                           day: 'numeric', month: 'short', year: 'numeric'
-                         })}</span>
-                       </p>
-                     </div>
-                   </div>
-                )}
+            {/* CONTENT */}
+            <div className="p-6 space-y-6 flex-grow md:p-0 md:space-y-5">
+              
+              {/* MOBILE TITLE: Visible only on mobile, keeping your original phone layout */}
+              <div className="md:hidden">
+                <DialogHeader className="p-0 space-y-1 text-left">
+                  <DialogTitle className="font-display text-3xl text-[#2D2D2D] tracking-tight">
+                    {dress.name}
+                  </DialogTitle>
+                </DialogHeader>
               </div>
+
+              <p className="text-gray-500 text-sm md:text-sm leading-relaxed">
+                {dress.description}
+              </p>
+
+              {/* Pricing Box */}
+              <div className="bg-[#F9F8F6] rounded-xl p-5 border border-[#EBE9E4] space-y-3">
+                <h4 className="font-display text-base text-[#4A4A4A]">Rental Pricing</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between items-center border-b border-[#EBE9E4] pb-2">
+                    <span className="text-gray-500 font-medium">Outfit Only</span>
+                    <span className="font-bold text-gray-900 text-base">
+                      ₹{Number(dress.price_without_jewelry).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center border-b border-[#EBE9E4] pb-2">
+                    <span className="text-gray-500 font-medium">With Matching Jewelry</span>
+                    <span className="font-bold text-[#D4AF37] text-base">
+                      ₹{Number(dress.price_with_jewelry).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <div className="pt-1 flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-gray-400" />
+                      <span className="text-xs uppercase tracking-wide text-gray-500">Security Deposit</span>
+                    </div>
+                    <span className="font-medium text-gray-700">
+                      ₹{Number(dress.security_deposit).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-gray-400 pl-6">
+                    Fully refundable upon safe return
+                  </p>
+                </div>
+              </div>
+
+              {/* Sizes */}
+              <div>
+                <h4 className="font-display text-sm text-[#4A4A4A] mb-2">Available Sizes</h4>
+                <div className="flex flex-wrap gap-2">
+                  {sizeList.map((size, i) => (
+                    <span 
+                      key={i} 
+                      className="min-w-[3rem] h-9 flex items-center justify-center border border-gray-200 rounded-md text-xs font-medium text-gray-700 bg-white shadow-sm"
+                    >
+                      {size}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Date Notice */}
+              {!isAvailable && dress.available_after && (
+                 <div className="bg-red-50 p-3 rounded-lg flex items-start gap-3 border border-red-100">
+                   <div className="bg-white p-1.5 rounded-full shadow-sm">
+                      <Calendar className="h-4 w-4 text-red-600" />
+                   </div>
+                   <div>
+                     <p className="text-[10px] font-bold text-red-800 uppercase tracking-wide">Currently Rented</p>
+                     <p className="text-xs text-red-600 mt-0.5">
+                       Available from <span className="font-semibold">{new Date(dress.available_after).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                     </p>
+                   </div>
+                 </div>
+              )}
+
+              {/* DESKTOP BUTTONS: Inline to match card layout */}
+              <div className="hidden md:flex gap-3 pt-2">
+                 <ActionButtons />
+              </div>
+
+              {/* Mobile spacer for sticky footer */}
+              <div className="h-24 md:hidden"></div>
             </div>
-
-            <div className="flex gap-3 pt-4 mt-3 border-t border-gray-100 bg-white">
-              <Button
-                className="flex-1 bg-[#25D366] hover:bg-[#1ebc57] text-white border-none shadow-md h-10 text-sm font-semibold rounded-md"
-                onClick={handleWhatsApp}
-              >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Book via WhatsApp
-              </Button>
-
-              <Button
-                variant="outline"
-                className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-black h-10 text-sm font-medium rounded-md"
-                onClick={() => (window.location.href = 'tel:+917225994009')}
-              >
-                <Phone className="h-4 w-4 mr-2" />
-                Call Now
-              </Button>
-            </div>
-
           </div>
         </div>
+
+        {/* MOBILE STICKY FOOTER */}
+        <div className="md:hidden p-4 border-t border-gray-100 bg-white z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+           <ActionButtons />
+        </div>
+
       </DialogContent>
     </Dialog>
   );

@@ -20,6 +20,30 @@ const DressCard = ({ dress, onViewDetails }: DressCardProps) => {
   const primaryImage = dress.images?.[0]?.url || '';
   const isAvailable = dress.status === 'available';
 
+  // --- HELPER: Turn "S, M, L" or ["S", "M"] into ['S', 'M'] ---
+  const getSizeArray = (sizes: string | string[]): string[] => {
+    // 1. If it's already an array, return it
+    if (Array.isArray(sizes)) return sizes;
+
+    // 2. If it's a string, clean it and split it
+    if (typeof sizes === 'string') {
+      // Check for JSON format "['S', 'L']"
+      if (sizes.trim().startsWith('[')) {
+        try {
+          return sizes.replace(/[\[\]"']/g, '').split(',').map(s => s.trim());
+        } catch (e) {
+          return [sizes];
+        }
+      }
+      // Standard comma format "S, M, L"
+      return sizes.split(',').map(s => s.trim());
+    }
+    return ['Free Size'];
+  };
+
+  const sizeList = getSizeArray(dress.sizes);
+  // -------------------------------------------------------------
+
   return (
     <div className="group card-elegant overflow-hidden flex flex-col h-full">
       {/* Image Container */}
@@ -32,7 +56,6 @@ const DressCard = ({ dress, onViewDetails }: DressCardProps) => {
           />
         )}
 
-        {/* Availability Badge */}
         <div className="absolute top-4 left-4">
           <Badge
             className={
@@ -45,7 +68,6 @@ const DressCard = ({ dress, onViewDetails }: DressCardProps) => {
           </Badge>
         </div>
 
-        {/* Category Badge */}
         <div className="absolute top-4 right-4">
           <Badge
             variant="outline"
@@ -55,7 +77,6 @@ const DressCard = ({ dress, onViewDetails }: DressCardProps) => {
           </Badge>
         </div>
 
-        {/* Quick Actions Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-chocolate/90 via-chocolate/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
           <div className="w-full flex gap-2">
             <Button
@@ -87,16 +108,28 @@ const DressCard = ({ dress, onViewDetails }: DressCardProps) => {
           {dress.description}
         </p>
 
-        {/* --- ADDED SECTION: SIZES & AVAILABILITY --- */}
-        <div className="flex flex-wrap gap-2 mb-4 mt-auto">
-          {/* Size Badge */}
-          <div className="inline-flex items-center px-2 py-1 rounded bg-secondary/50 border border-border text-xs font-medium text-muted-foreground">
-            Size: <span className="text-foreground ml-1">{dress.sizes}</span>
+        {/* --- UPDATED SIZE SECTION --- */}
+        <div className="flex flex-col gap-3 mb-4 mt-auto">
+          
+          {/* 1. SIZES ROW (Rendered as distinct blocks) */}
+          <div className="flex items-center gap-2">
+             <span className="text-xs text-muted-foreground">Sizes:</span>
+             <div className="flex gap-1.5 flex-wrap">
+               {sizeList.map((size, index) => (
+                 <span 
+                   key={index} 
+                   // This styling creates the small beige box look from your reference
+                   className="inline-flex items-center justify-center min-w-[24px] px-1.5 py-0.5 rounded text-[11px] font-medium bg-[#F5F5F4] text-[#44403C] border border-[#E7E5E4]"
+                 >
+                   {size}
+                 </span>
+               ))}
+             </div>
           </div>
 
-          {/* Available After Date (Only shows if date exists) */}
+          {/* 2. DATE ROW (Only if rented) */}
           {dress.available_after && (
-            <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-red-50 border border-red-100 text-xs font-medium text-red-800">
+            <div className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded bg-red-50 border border-red-100 text-xs font-medium text-red-800 w-fit">
               <Calendar className="h-3 w-3" />
               <span>
                 Available after: {new Date(dress.available_after).toLocaleDateString('en-GB', {
@@ -108,7 +141,7 @@ const DressCard = ({ dress, onViewDetails }: DressCardProps) => {
             </div>
           )}
         </div>
-        {/* ------------------------------------------- */}
+        {/* --------------------------- */}
 
         <div className="space-y-2 mb-1 pt-2 border-t border-border">
           <div className="flex justify-between items-center text-sm">

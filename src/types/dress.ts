@@ -15,6 +15,6 @@ export interface Dress {
   status: 'available' | 'rented' | 'maintenance';
   available_after: string | null;
 
-  sizes: string;
+  sizes: string | string[];
   images: DressImage[];
 }

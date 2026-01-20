@@ -4,8 +4,37 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Shield, AlertTriangle, Info } from 'lucide-react';
-import { damagePenalties } from '@/data/dresses';
+import { Shield, AlertTriangle, Info, IndianRupee } from 'lucide-react';
+
+// Hardcoded data with numeric values for cleaner handling
+const customDamagePenalties = [
+  {
+    type: 'Minor Stain',
+    price: 250,
+    description: 'Small stains that can be removed with standard dry cleaning methods (e.g., food drops, light dirt).',
+  },
+  {
+    type: 'Major Stain',
+    price: 600,
+    description: 'Stubborn stains requiring specialized treatment or multiple cleaning cycles (e.g., oil, wine, mud).',
+  },
+  {
+    type: 'Tears & Rips',
+    price: 1500,
+    description: 'Visible tears in the fabric, lining, or seams that require professional mending.',
+  },
+  {
+    type: 'Missing Jewelry / Embellishments',
+    price: 500,
+    perPiece: true, // Flag to show "per piece" text
+    description: 'Loss of accompanying jewelry pieces (earrings, maang tikka, etc.) or significant loss of stone/sequin work.',
+  },
+  {
+    type: 'Severe Damage',
+    isSevere: true, // Flag for special "Actual Cost" handling
+    description: 'Irreparable damage such as burns, large holes, or chemical stains that render the outfit unwearable.',
+  },
+];
 
 const PoliciesSection = () => {
   return (
@@ -39,7 +68,7 @@ const PoliciesSection = () => {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-accent mt-1">•</span>
-                <span>Amount varies based on outfit value (₹1,00 - ₹2,000)</span>
+                <span>Amount varies based on outfit value (₹1,000 - ₹2,000)</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-accent mt-1">•</span>
@@ -92,23 +121,31 @@ const PoliciesSection = () => {
             </div>
             
             <Accordion type="single" collapsible className="w-full">
-              {damagePenalties.map((penalty, index) => (
-                <AccordionItem key={index} value={`item-${index}`}>
-                  <AccordionTrigger className="text-left">
+              {customDamagePenalties.map((penalty, index) => (
+                <AccordionItem key={index} value={`item-${index}`} className="border-b border-border/50">
+                  <AccordionTrigger className="text-left hover:no-underline py-4">
                     <div className="flex items-center justify-between flex-1 pr-4">
-                      <span className="font-medium">{penalty.type}</span>
-                      <span className="text-sm text-muted-foreground">
-                        {penalty.maxCharge === 0 
-                          ? 'Full replacement cost'
-                          : `₹${penalty.minCharge.toLocaleString()} - ₹${penalty.maxCharge.toLocaleString()}`
-                        }
+                      <span className="font-medium text-foreground text-lg">{penalty.type}</span>
+                      
+                      {/* PRICE DISPLAY FIX */}
+                      <span className="flex items-center gap-1 font-bold text-accent whitespace-nowrap">
+                        {penalty.isSevere ? (
+                          <span>Actual Cost</span>
+                        ) : (
+                          <>
+                            {/* Using Icon for Rupee to ensure visibility */}
+                            <IndianRupee className="h-4 w-4" strokeWidth={2.5} />
+                            <span>{penalty.price?.toLocaleString()}</span>
+                            {penalty.perPiece && <span className="text-xs font-normal text-muted-foreground ml-1">per piece</span>}
+                          </>
+                        )}
                       </span>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">
+                  <AccordionContent className="text-muted-foreground pb-4">
                     {penalty.description}
-                    {penalty.maxCharge === 0 && (
-                      <p className="mt-2 text-burgundy font-medium">
+                    {penalty.isSevere && (
+                      <p className="mt-2 text-burgundy font-medium bg-burgundy/5 p-3 rounded-md">
                         Charges will be equivalent to the full outfit purchase price.
                       </p>
                     )}
@@ -117,7 +154,7 @@ const PoliciesSection = () => {
               ))}
             </Accordion>
 
-            <p className="mt-6 text-sm text-muted-foreground bg-secondary/50 p-4 rounded-lg">
+            <p className="mt-6 text-sm text-muted-foreground bg-secondary/50 p-4 rounded-lg border border-border/50">
               <strong className="text-foreground">Note:</strong> All damages are assessed upon return. 
               Any applicable charges will be deducted from your security deposit. 
               If damages exceed the deposit amount, the balance will need to be paid before future rentals.

@@ -41,7 +41,6 @@ const DressDetailModal = ({ dress, isOpen, onClose }: DressDetailModalProps) => 
     ? (Array.isArray(dress.sizes) ? dress.sizes : dress.sizes.split(',').map(s => s.trim()))
     : ['Free Size'];
 
-  // Mobile buttons: Kept exactly as requested (h-11, text-sm)
   const ActionButtons = () => (
     <div className="flex gap-3 w-full">
       <Button 
@@ -64,31 +63,35 @@ const DressDetailModal = ({ dress, isOpen, onClose }: DressDetailModalProps) => 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      {/* LAYOUT STRATEGY:
-         Mobile: Fixed height (max-h-[92vh]), Flex col, internal scroll.
-         Desktop: Auto height (fit content), Max width reduced for "Card" feel, No internal scroll bar.
-      */}
       <DialogContent className="
         w-[95vw] bg-white rounded-xl shadow-2xl border-none gap-0 outline-none p-0
         max-h-[92vh] overflow-hidden flex flex-col
         md:max-w-[900px] md:h-auto md:block md:overflow-visible
       ">
         
-        {/* DESKTOP TITLE: Sits at the very top, above columns. Hidden on mobile to preserve mobile flow. */}
+        {/* DESKTOP TITLE: Sticky top on desktop, hidden on mobile */}
         <div className="hidden md:block p-6 pb-2">
            <DialogTitle className="font-display text-3xl text-[#2D2D2D] tracking-tight">
               {dress.name}
            </DialogTitle>
         </div>
 
-        {/* WRAPPER:
-           Mobile: Flex Col (Image -> Details).
-           Desktop: Flex Row (Image Left | Details Right).
-        */}
+        {/* SCROLLABLE WRAPPER */}
         <div className="
           flex-1 flex flex-col overflow-y-auto custom-scrollbar
           md:flex-row md:p-6 md:pt-2 md:gap-8 md:overflow-visible md:h-auto
         ">
+          
+          {/* FIX 1: MOBILE TITLE MOVED HERE 
+             It is now the first child in the flex column, so it renders ABOVE the image on phones.
+          */}
+          <div className="md:hidden p-4 pb-2 bg-white">
+            <DialogHeader className="p-0 space-y-1 text-left">
+              <DialogTitle className="font-display text-2xl text-[#2D2D2D] tracking-tight leading-tight">
+                {dress.name}
+              </DialogTitle>
+            </DialogHeader>
+          </div>
           
           {/* ================= LEFT COLUMN (IMAGES) ================= */}
           <div className="
@@ -123,10 +126,11 @@ const DressDetailModal = ({ dress, isOpen, onClose }: DressDetailModalProps) => 
               </div>
             </div>
 
-            {/* THUMBNAILS - Desktop: Hidden or Small underneath? Kept basic to match "Blush Pink" card style */}
+            {/* THUMBNAILS */}
+            {/* FIX 2: Removed z-10 to prevent border overlay glitches. Added relative positioning. */}
             {dress.images?.length > 1 && (
               <div 
-                className="flex p-4 bg-white border-t border-gray-100 gap-3 overflow-x-auto justify-start md:justify-center whitespace-nowrap shrink-0 z-10 md:border-none md:p-0 md:mt-3 md:justify-start"
+                className="flex p-4 bg-white border-t border-gray-100 gap-3 overflow-x-auto justify-start md:justify-center whitespace-nowrap shrink-0 relative md:border-none md:p-0 md:mt-3 md:justify-start"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
                 {dress.images.map((img, index) => (
@@ -157,17 +161,8 @@ const DressDetailModal = ({ dress, isOpen, onClose }: DressDetailModalProps) => 
           ">
             
             {/* CONTENT */}
-            <div className="p-6 space-y-6 flex-grow md:p-0 md:space-y-5">
+            <div className="p-4 md:p-0 space-y-6 flex-grow">
               
-              {/* MOBILE TITLE: Visible only on mobile, keeping your original phone layout */}
-              <div className="md:hidden">
-                <DialogHeader className="p-0 space-y-1 text-left">
-                  <DialogTitle className="font-display text-3xl text-[#2D2D2D] tracking-tight">
-                    {dress.name}
-                  </DialogTitle>
-                </DialogHeader>
-              </div>
-
               <p className="text-gray-500 text-sm md:text-sm leading-relaxed">
                 {dress.description}
               </p>
@@ -233,7 +228,7 @@ const DressDetailModal = ({ dress, isOpen, onClose }: DressDetailModalProps) => 
                  </div>
               )}
 
-              {/* DESKTOP BUTTONS: Inline to match card layout */}
+              {/* DESKTOP BUTTONS */}
               <div className="hidden md:flex gap-3 pt-2">
                  <ActionButtons />
               </div>

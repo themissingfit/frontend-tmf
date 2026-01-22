@@ -6,7 +6,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, Phone, Calendar, Shield } from 'lucide-react';
+import { MessageCircle, Phone, Calendar, Shield, X } from 'lucide-react';
 import { Dress } from '@/types/dress';
 import { useEffect, useState } from 'react';
 
@@ -70,19 +70,28 @@ const DressDetailModal = ({ dress, isOpen, onClose }: DressDetailModalProps) => 
       ">
         
         {/* DESKTOP TITLE (Hidden on Mobile) */}
+        {/* FIX: Removed the manual close button here to prevent duplication */}
         <div className="hidden md:block p-6 pb-2">
            <DialogTitle className="font-display text-3xl text-[#2D2D2D] tracking-tight">
-              {dress.name}
+             {dress.name}
            </DialogTitle>
         </div>
 
-        {/* MOBILE HEADER (Sticky Top) */}
-        <div className="md:hidden p-3 border-b border-gray-100 flex-shrink-0 bg-white rounded-t-xl z-20">
-          <DialogHeader className="p-0 space-y-0 text-left">
+        {/* MOBILE HEADER (Sticky Top with Manual Close Button) */}
+        <div className="md:hidden p-3 border-b border-gray-100 flex-shrink-0 bg-white rounded-t-xl z-20 flex items-center justify-between gap-3">
+          <DialogHeader className="p-0 space-y-0 text-left min-w-0">
             <DialogTitle className="font-display text-base text-[#2D2D2D] tracking-tight leading-tight line-clamp-1">
               {dress.name}
             </DialogTitle>
           </DialogHeader>
+          
+          {/* This button is only for Mobile to ensure visibility */}
+          <button 
+            onClick={onClose}
+            className="p-1.5 -mr-1.5 text-gray-500 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
         {/* SCROLLABLE BODY */}
@@ -99,10 +108,6 @@ const DressDetailModal = ({ dress, isOpen, onClose }: DressDetailModalProps) => 
             
             {/* MAIN IMAGE CONTAINER */}
             <div className="relative w-full bg-gray-100 group md:rounded-xl overflow-hidden">
-              
-              {/* FIX: We use aspect-[3/4] to enforce the perfect ratio.
-                  This ensures the image is NEVER cropped, regardless of screen size.
-              */}
               <div className="aspect-[3/4] w-full relative">
                 {activeImage && (
                   <img
